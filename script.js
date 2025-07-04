@@ -49,7 +49,7 @@ const depositButton = document.getElementById('depositButton');
 
 // Secret Unlock Codes
 const REQUIRED_UNLOCK_CODE = '956523332996147453';
-const REQUIRED_DEPOSIT_UNLOCK_CODE = '1234567890'; // New secret code for deposit function
+const REQUIRED_DEPOSIT_UNLOCK_CODE = '956523332996147453944423108'; // New secret code for deposit function
 
 // State variables (managed by JavaScript directly)
 let clientsData = {};
