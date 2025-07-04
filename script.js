@@ -37,12 +37,25 @@ const clientToDeleteNameSpan = document.getElementById('clientToDeleteName');
 const confirmDeleteButton = document.getElementById('confirmDeleteButton');
 const cancelDeleteButton = document.getElementById('cancelDeleteButton');
 
-// Secret Unlock Code
+// New DOM Elements for Add Money Functionality
+const unlockDepositSection = document.getElementById('unlockDepositSection');
+const unlockDepositCodeInput = document.getElementById('unlockDepositCodeInput');
+const unlockDepositButton = document.getElementById('unlockDepositButton');
+const addMoneySection = document.getElementById('addMoneySection');
+const selectedClientDepositSelect = document.getElementById('selectedClientDepositSelect');
+const depositValueInput = document.getElementById('depositValueInput');
+const depositButton = document.getElementById('depositButton');
+
+
+// Secret Unlock Codes
 const REQUIRED_UNLOCK_CODE = '956523332996147453';
+const REQUIRED_DEPOSIT_UNLOCK_CODE = '1234567890'; // New secret code for deposit function
 
 // State variables (managed by JavaScript directly)
 let clientsData = {};
 let clientToDeleteCode = null; // Stores the code of the client to be deleted
+let isAddClientUnlocked = false; // State for add client unlock
+let isAddMoneyUnlocked = false; // New state for add money unlock
 
 // --- Utility Functions ---
 
@@ -85,7 +98,9 @@ function renderClientsList(clients) {
     clientsListContainer.appendChild(table);
 
     const clientsTableBody = document.getElementById('clientsTableBody');
-    selectedClientCodeSelect.innerHTML = '<option value="">Selecione um Cliente</option>'; // Clear and reset select
+    selectedClientCodeSelect.innerHTML = '<option value="">Selecione um Cliente</option>'; // Clear and reset select for discount
+    selectedClientDepositSelect.innerHTML = '<option value="">Selecione um Cliente</option>'; // Clear and reset select for deposit
+
 
     for (const code in clients) {
         const client = clients[code];
@@ -103,11 +118,17 @@ function renderClientsList(clients) {
         `;
         clientsTableBody.appendChild(row);
 
-        // Add option to select dropdown
-        const option = document.createElement('option');
-        option.value = code;
-        option.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
-        selectedClientCodeSelect.appendChild(option);
+        // Add option to select dropdown for discount
+        const optionDiscount = document.createElement('option');
+        optionDiscount.value = code;
+        optionDiscount.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
+        selectedClientCodeSelect.appendChild(optionDiscount);
+
+        // Add option to select dropdown for deposit
+        const optionDeposit = document.createElement('option');
+        optionDeposit.value = code;
+        optionDeposit.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
+        selectedClientDepositSelect.appendChild(optionDeposit);
     }
 
     // Add event listeners to remove buttons
@@ -149,13 +170,15 @@ function saveClientsToLocalStorage(clients) {
 
 // --- Event Handlers ---
 
+// Event listener for Unlock Add Client button
 unlockButton.addEventListener('click', () => {
     const enteredCode = unlockCodeInput.value.trim();
-    console.log("Botão 'Desbloquear' clicado.");
+    console.log("Botão 'Desbloquear Adição de Cliente' clicado.");
     console.log("Código digitado (trim):", enteredCode);
     console.log("Código esperado:", REQUIRED_UNLOCK_CODE);
 
     if (enteredCode === REQUIRED_UNLOCK_CODE) {
+        isAddClientUnlocked = true;
         addClientSection.classList.remove('hidden');
         unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
@@ -165,7 +188,31 @@ unlockButton.addEventListener('click', () => {
     }
 });
 
+// Event listener for Unlock Deposit button
+unlockDepositButton.addEventListener('click', () => {
+    const enteredCode = unlockDepositCodeInput.value.trim();
+    console.log("Botão 'Desbloquear Adicionar Dinheiro' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_DEPOSIT_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
+        isAddMoneyUnlocked = true;
+        addMoneySection.classList.remove('hidden');
+        unlockDepositSection.classList.add('hidden');
+        showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
+        unlockDepositCodeInput.value = '';
+    } else {
+        showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
+    }
+});
+
+
 addClientButton.addEventListener('click', async () => {
+    if (!isAddClientUnlocked) {
+        showMessage("Por favor, desbloqueie a função de adicionar cliente primeiro.", 'error');
+        return;
+    }
+
     const newClientCode = newClientCodeInput.value.trim();
     const newClientName = newClientNameInput.value.trim();
     const newClientInitialBalance = parseFloat(newClientInitialBalanceInput.value);
@@ -244,6 +291,49 @@ discountButton.addEventListener('click', async () => {
     }
 });
 
+// New Event listener for Deposit button
+depositButton.addEventListener('click', async () => {
+    if (!isAddMoneyUnlocked) {
+        showMessage("Por favor, desbloqueie a função de adicionar dinheiro primeiro.", 'error');
+        return;
+    }
+
+    const selectedCode = selectedClientDepositSelect.value;
+    const depositValue = parseFloat(depositValueInput.value);
+
+    if (!selectedCode) {
+        showMessage("Por favor, selecione um cliente para adicionar dinheiro.", 'error');
+        return;
+    }
+    const client = clientsData[selectedCode];
+    if (!client) {
+        showMessage("Cliente não encontrado.", 'error');
+        return;
+    }
+
+    if (isNaN(depositValue) || depositValue <= 0) {
+        showMessage("Valor inválido para depósito! Use números positivos.", 'error');
+        return;
+    }
+
+    const saldoAnterior = client.saldo;
+    const novoSaldo = saldoAnterior + depositValue;
+    const updatedClientData = { ...client, saldo: novoSaldo };
+
+    clientsData[selectedCode] = updatedClientData; // Update local state
+    const success = saveClientsToLocalStorage(clientsData); // Save to local storage
+
+    if (success) {
+        showMessage(`✅ R$${depositValue.toFixed(2)} adicionado a ${client.nome}. Novo saldo: R$${novoSaldo.toFixed(2)}`);
+        depositValueInput.value = '';
+        renderClientsList(clientsData); // Re-render UI
+    } else {
+        showMessage("Erro ao adicionar dinheiro. Tente novamente.", 'error');
+        clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
+    }
+});
+
+
 confirmDeleteButton.addEventListener('click', async () => {
     if (clientToDeleteCode) {
         // Delete from local state
@@ -280,5 +370,13 @@ window.onload = () => {
     const userIdDisplayElement = document.getElementById('userIdDisplay');
     if (userIdDisplayElement) {
         userIdDisplayElement.classList.add('hidden');
+    }
+
+    // Initialize visibility of sections
+    if (!isAddClientUnlocked) {
+        addClientSection.classList.add('hidden');
+    }
+    if (!isAddMoneyUnlocked) {
+        addMoneySection.classList.add('hidden');
     }
 };
