@@ -46,16 +46,23 @@ const selectedClientDepositSelect = document.getElementById('selectedClientDepos
 const depositValueInput = document.getElementById('depositValueInput');
 const depositButton = document.getElementById('depositButton');
 
+// New DOM Elements for Remove Client Unlock
+const unlockRemoveClientSection = document.getElementById('unlockRemoveClientSection');
+const unlockRemoveClientCodeInput = document.getElementById('unlockRemoveClientCodeInput');
+const unlockRemoveClientButton = document.getElementById('unlockRemoveClientButton');
+
 
 // Secret Unlock Codes
-const REQUIRED_UNLOCK_CODE = '956523332996147453';
-const REQUIRED_DEPOSIT_UNLOCK_CODE = '956523332996147453944423108'; // New secret code for deposit function
+const REQUIRED_UNLOCK_CODE = '956523332996147453'; // Code for Add Client
+const REQUIRED_DEPOSIT_UNLOCK_CODE = '1234567890'; // Code for Add Money
+const REQUIRED_REMOVE_UNLOCK_CODE = '956523332996147453'; // New code for Remove Client
 
 // State variables (managed by JavaScript directly)
 let clientsData = {};
 let clientToDeleteCode = null; // Stores the code of the client to be deleted
 let isAddClientUnlocked = false; // State for add client unlock
 let isAddMoneyUnlocked = false; // New state for add money unlock
+let isRemoveClientUnlocked = false; // New state for remove client unlock
 
 // --- Utility Functions ---
 
@@ -134,6 +141,10 @@ function renderClientsList(clients) {
     // Add event listeners to remove buttons
     document.querySelectorAll('.remove-client-btn').forEach(button => {
         button.addEventListener('click', (event) => {
+            if (!isRemoveClientUnlocked) { // Check if remove client function is unlocked
+                showMessage("Por favor, desbloqueie a função de remover cliente primeiro.", 'error');
+                return;
+            }
             const code = event.target.dataset.clientCode;
             clientToDeleteCode = code;
             clientToDeleteNameSpan.textContent = clientsData[code]?.nome || code;
@@ -203,6 +214,23 @@ unlockDepositButton.addEventListener('click', () => {
         unlockDepositCodeInput.value = '';
     } else {
         showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
+    }
+});
+
+// New Event listener for Unlock Remove Client button
+unlockRemoveClientButton.addEventListener('click', () => {
+    const enteredCode = unlockRemoveClientCodeInput.value.trim();
+    console.log("Botão 'Desbloquear Remover Cliente' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_REMOVE_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
+        isRemoveClientUnlocked = true;
+        unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
+        showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
+        unlockRemoveClientCodeInput.value = '';
+    } else {
+        showMessage("Erro: Código de desbloqueio incorreto para remover cliente.", 'error');
     }
 });
 
@@ -335,6 +363,8 @@ depositButton.addEventListener('click', async () => {
 
 
 confirmDeleteButton.addEventListener('click', async () => {
+    // The check for isRemoveClientUnlocked is now done in renderClientsList when the button is clicked
+    // This ensures the modal only appears if unlocked.
     if (clientToDeleteCode) {
         // Delete from local state
         const clientName = clientsData[clientToDeleteCode]?.nome || clientToDeleteCode;
@@ -378,5 +408,12 @@ window.onload = () => {
     }
     if (!isAddMoneyUnlocked) {
         addMoneySection.classList.add('hidden');
+    }
+    if (!isRemoveClientUnlocked) { // Hide remove client unlock section initially
+        // Note: The remove client buttons are always visible, but the action is blocked by the password.
+        // This section is for the unlock input.
+        unlockRemoveClientSection.classList.remove('hidden'); // Ensure it's visible for unlocking
+    } else {
+        unlockRemoveClientSection.classList.add('hidden'); // Hide if already unlocked (e.g., from previous session)
     }
 };
