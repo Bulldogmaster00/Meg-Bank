@@ -24,9 +24,10 @@
             Meg Bank
         </h1>
 
-        <p id="userIdDisplay" class="text-sm text-gray-600 text-center mb-4 hidden">
+        <!-- Removed userIdDisplay as there's no Firebase user ID -->
+        <!-- <p id="userIdDisplay" class="text-sm text-gray-600 text-center mb-4 hidden">
             Seu ID de Usuário (para sincronização): <span class="font-mono bg-gray-200 px-2 py-1 rounded-md" id="currentUserId"></span>
-        </p>
+        </p> -->
 
         <div id="messageDisplay" class="p-3 rounded-lg mb-6 text-center hidden"></div>
 
@@ -83,6 +84,54 @@
             </button>
         </div>
 
+        <!-- New Unlock Add Money Section -->
+        <div id="unlockDepositSection" class="mb-10 p-6 bg-green-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold text-green-800 mb-4">Desbloquear Adicionar Dinheiro</h2>
+            <p class="text-gray-700 mb-4">
+                Para adicionar dinheiro aos clientes, insira o código de desbloqueio:
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input
+                    type="password"
+                    id="unlockDepositCodeInput"
+                    placeholder="Insira o código de desbloqueio"
+                    class="flex-grow p-3 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <button
+                    id="unlockDepositButton"
+                    class="bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition duration-300 ease-in-out shadow-md"
+                >
+                    Desbloquear
+                </button>
+            </div>
+        </div>
+
+        <!-- New Add Money Section -->
+        <div id="addMoneySection" class="mb-10 p-6 bg-teal-50 rounded-lg shadow-inner hidden">
+            <h2 class="text-2xl font-semibold text-teal-800 mb-4">Adicionar Dinheiro</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <select
+                    id="selectedClientDepositSelect"
+                    class="p-3 border border-teal-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white"
+                >
+                    <option value="">Selecione um Cliente</option>
+                </select>
+                <input
+                    type="number"
+                    id="depositValueInput"
+                    placeholder="Valor a Adicionar (R$)"
+                    class="p-3 border border-teal-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+            </div>
+            <button
+                id="depositButton"
+                class="w-full bg-teal-600 text-white py-3 px-6 rounded-md hover:bg-teal-700 transition duration-300 ease-in-out shadow-md"
+            >
+                Adicionar
+            </button>
+        </div>
+
+
         <!-- Descontar Saldo Section -->
         <div class="mb-10 p-6 bg-purple-50 rounded-lg shadow-inner">
             <h2 class="text-2xl font-semibold text-purple-800 mb-4">Descontar Saldo</h2>
@@ -112,7 +161,7 @@
         <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Clientes Atuais</h2>
             <div id="clientsListContainer">
-                <p class="text-gray-600 text-center">Nenhum cliente cadastrado ainda.</p>
+                <p class="text-gray-600 text-center">Nenhum cliente registado ainda.</p>
             </div>
         </div>
 
@@ -139,7 +188,7 @@
         </div>
     </div>
 
-    <!-- Link para o arquivo JavaScript externo -->
-    <script src="script.js" type="module"></script>
+    <!-- Link para o ficheiro JavaScript externo -->
+    <script src="script.js"></script>
 </body>
 </html>
