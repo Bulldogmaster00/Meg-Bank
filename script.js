@@ -1,30 +1,24 @@
-// Firebase SDK imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, deleteDoc, collection, query, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// Remove Firebase SDK imports as we are not using Firebase
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+// import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+// import { getFirestore, doc, setDoc, deleteDoc, collection, query, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// Global variables provided by the Canvas environment
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// --- INÍCIO DA CONFIGURAÇÃO (SEM FIREBASE) ---
+// Não há configurações de Firebase aqui. O armazenamento é local.
+// --- FIM DA CONFIGURAÇÃO (SEM FIREBASE) ---
 
-// Firebase Initialization
-let app, db, auth;
-let currentUserId = null;
-let isAuthReady = false;
 
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-    console.log("Firebase inicializado com sucesso.");
-} catch (error) {
-    console.error("Erro ao inicializar Firebase:", error);
-    showMessage(`Erro ao inicializar Firebase: ${error.message}`, 'error');
-}
+// Remove Firebase Initialization variables
+let app, db, auth; // These will remain undefined
+let currentUserId = 'local_user'; // A user ID for local storage context
+let isAuthReady = true; // Always ready for local storage
+
+console.log("Script.js carregado e a iniciar (sem Firebase)...");
 
 // DOM Elements
-const userIdDisplay = document.getElementById('userIdDisplay');
-const currentUserIdSpan = document.getElementById('currentUserId');
+// Remove userIdDisplay as there's no Firebase user ID
+// const userIdDisplay = document.getElementById('userIdDisplay');
+// const currentUserIdSpan = document.getElementById('currentUserId');
 const messageDisplay = document.getElementById('messageDisplay');
 const unlockSection = document.getElementById('unlockSection');
 const unlockCodeInput = document.getElementById('unlockCodeInput');
@@ -70,7 +64,7 @@ function renderClientsList(clients) {
     clientsListContainer.innerHTML = ''; // Clear previous list
 
     if (Object.keys(clients).length === 0) {
-        clientsListContainer.innerHTML = '<p class="text-gray-600 text-center">Nenhum cliente cadastrado ainda.</p>';
+        clientsListContainer.innerHTML = '<p class="text-gray-600 text-center">Nenhum cliente registado ainda.</p>';
         return;
     }
 
@@ -127,69 +121,44 @@ function renderClientsList(clients) {
     });
 }
 
-// --- Firebase Operations ---
+// --- Local Storage Operations (Replacing Firebase) ---
 
-async function saveClientToFirestore(clientCode, clientData) {
-    if (!db || !currentUserId) {
-        showMessage("Erro: Firebase não inicializado ou usuário não autenticado.", 'error');
-        console.error("Erro: saveClientToFirestore - DB ou userId ausente.");
-        return false;
-    }
+function loadClientsFromLocalStorage() {
     try {
-        console.log(`Tentando salvar cliente ${clientCode} no Firestore...`);
-        await setDoc(doc(db, `artifacts/${appId}/public/data/clients`, clientCode), clientData);
-        console.log(`Cliente ${clientCode} salvo com sucesso.`);
+        const storedClients = localStorage.getItem('megBankClients');
+        return storedClients ? JSON.parse(storedClients) : {};
+    } catch (e) {
+        console.error("Erro ao carregar clientes do localStorage:", e);
+        showMessage("Erro ao carregar dados locais. Os dados podem estar corrompidos.", 'error');
+        return {};
+    }
+}
+
+function saveClientsToLocalStorage(clients) {
+    try {
+        localStorage.setItem('megBankClients', JSON.stringify(clients));
         return true;
     } catch (e) {
-        console.error(`Erro ao salvar cliente ${clientCode} no Firestore:`, e);
-        showMessage(`Erro ao salvar dados do cliente ${clientCode}: ${e.message}`, 'error');
+        console.error("Erro ao guardar clientes no localStorage:", e);
+        showMessage("Erro ao guardar dados locais. O armazenamento pode estar cheio.", 'error');
         return false;
     }
 }
 
-async function deleteClientFromFirestore(clientCode) {
-    if (!db || !currentUserId) {
-        showMessage("Erro: Firebase não inicializado ou usuário não autenticado.", 'error');
-        console.error("Erro: deleteClientFromFirestore - DB ou userId ausente.");
-        return false;
-    }
-    try {
-        console.log(`Tentando remover cliente ${clientCode} do Firestore...`);
-        await deleteDoc(doc(db, `artifacts/${appId}/public/data/clients`, clientCode));
-        console.log(`Cliente ${clientCode} removido com sucesso.`);
-        return true;
-    } catch (e) {
-        console.error(`Erro ao remover cliente ${clientCode} do Firestore:`, e);
-        showMessage(`Erro ao remover cliente ${clientCode}: ${e.message}`, 'error');
-        return false;
-    }
-}
-
-async function logTransactionToFirestore(transactionData) {
-    if (!db || !currentUserId) {
-        console.error("Erro: logTransactionToFirestore - Firebase não inicializado ou usuário não autenticado para registrar transação.");
-        return;
-    }
-    try {
-        console.log("Registrando transação no Firestore...");
-        await addDoc(collection(db, `artifacts/${appId}/public/data/transactions`), {
-            ...transactionData,
-            timestamp: new Date().toISOString(),
-            userId: currentUserId
-        });
-        console.log("Transação registrada com sucesso.");
-    } catch (e) {
-        console.error("Erro ao registrar transação no Firestore:", e);
-    }
-}
+// Removed logTransactionToFirestore as it's a backend/database feature
 
 // --- Event Handlers ---
 
 unlockButton.addEventListener('click', () => {
-    if (unlockCodeInput.value === REQUIRED_UNLOCK_CODE) {
+    const enteredCode = unlockCodeInput.value.trim();
+    console.log("Botão 'Desbloquear' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_UNLOCK_CODE) {
         addClientSection.classList.remove('hidden');
         unlockSection.classList.add('hidden');
-        showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!");
+        showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
         unlockCodeInput.value = '';
     } else {
         showMessage("Erro: Código de desbloqueio incorreto.", 'error');
@@ -219,14 +188,18 @@ addClientButton.addEventListener('click', async () => {
         nome: newClientName || `Cliente ${newClientCode}`,
     };
 
-    const success = await saveClientToFirestore(newClientCode, newClient);
+    clientsData[newClientCode] = newClient; // Update local state
+    const success = saveClientsToLocalStorage(clientsData); // Save to local storage
+
     if (success) {
         showMessage(`✅ Cliente ${newClientCode} (${newClient.nome}) adicionado com sucesso com saldo R$${newClientInitialBalance.toFixed(2)}.`);
         newClientCodeInput.value = '';
         newClientNameInput.value = '';
         newClientInitialBalanceInput.value = '';
+        renderClientsList(clientsData); // Re-render UI
     } else {
         showMessage("Erro ao adicionar cliente. Tente novamente.", 'error');
+        delete clientsData[newClientCode]; // Revert local state if save fails
     }
 });
 
@@ -257,28 +230,33 @@ discountButton.addEventListener('click', async () => {
     const novoSaldo = saldoAnterior - discountValue;
     const updatedClientData = { ...client, saldo: novoSaldo };
 
-    const success = await saveClientToFirestore(selectedCode, updatedClientData);
+    clientsData[selectedCode] = updatedClientData; // Update local state
+    const success = saveClientsToLocalStorage(clientsData); // Save to local storage
+
     if (success) {
         showMessage(`✅ R$${discountValue.toFixed(2)} descontado de ${client.nome}. Novo saldo: R$${novoSaldo.toFixed(2)}`);
-        logTransactionToFirestore({
-            cliente: selectedCode,
-            valor: discountValue,
-            saldo_anterior: saldoAnterior,
-            saldo_novo: novoSaldo,
-        });
+        // Removed logTransactionToFirestore
         discountValueInput.value = '';
+        renderClientsList(clientsData); // Re-render UI
     } else {
         showMessage("Erro ao descontar saldo. Tente novamente.", 'error');
+        clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
     }
 });
 
 confirmDeleteButton.addEventListener('click', async () => {
     if (clientToDeleteCode) {
-        const success = await deleteClientFromFirestore(clientToDeleteCode);
+        // Delete from local state
+        const clientName = clientsData[clientToDeleteCode]?.nome || clientToDeleteCode;
+        delete clientsData[clientToDeleteCode];
+        const success = saveClientsToLocalStorage(clientsData); // Save to local storage
+
         if (success) {
-            showMessage(`✅ Cliente ${clientToDeleteCode} removido com sucesso!`);
+            showMessage(`✅ Cliente ${clientName} removido com sucesso!`);
+            renderClientsList(clientsData); // Re-render UI
         } else {
-            showMessage(`Erro ao remover cliente ${clientToDeleteCode}.`, 'error');
+            showMessage(`Erro ao remover cliente ${clientName}.`, 'error');
+            // Revert if save fails (complex for delete, usually just let it fail)
         }
         clientToDeleteCode = null;
         confirmModal.classList.add('hidden');
@@ -291,54 +269,16 @@ cancelDeleteButton.addEventListener('click', () => {
     showMessage("Remoção de cliente cancelada.");
 });
 
-// --- Initial Setup and Firebase Listeners ---
+// --- Initial Setup ---
 
 window.onload = () => {
-    // Authentication
-    if (!app || !db || !auth) {
-        console.error("Firebase não inicializado na carga da janela.");
-        return;
+    // Load clients from local storage on page load
+    clientsData = loadClientsFromLocalStorage();
+    renderClientsList(clientsData); // Render initial list
+
+    // Hide userIdDisplay as it's not relevant without Firebase Auth
+    const userIdDisplayElement = document.getElementById('userIdDisplay');
+    if (userIdDisplayElement) {
+        userIdDisplayElement.classList.add('hidden');
     }
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUserId = user.uid;
-            isAuthReady = true;
-            currentUserIdSpan.textContent = currentUserId;
-            userIdDisplay.classList.remove('hidden');
-            console.log("Usuário autenticado:", currentUserId);
-
-            // Setup Firestore listener after authentication
-            const clientsCollectionRef = collection(db, `artifacts/${appId}/public/data/clients`);
-            const q = query(clientsCollectionRef);
-
-            onSnapshot(q, (snapshot) => {
-                console.log("Dados de clientes recebidos do Firestore (onSnapshot).");
-                const updatedClients = {};
-                snapshot.forEach((doc) => {
-                    updatedClients[doc.id] = doc.data();
-                });
-                clientsData = updatedClients; // Update local state
-                renderClientsList(clientsData); // Re-render UI
-            }, (err) => {
-                console.error("Erro ao carregar clientes do Firestore (onSnapshot):", err);
-                showMessage(`Erro ao carregar dados dos clientes: ${err.message}.`, 'error');
-            });
-
-        } else {
-            console.log("Nenhum usuário autenticado. Tentando autenticação inicial.");
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                    console.log("Autenticado com token personalizado após onAuthStateChanged.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Autenticado anonimamente após onAuthStateChanged.");
-                }
-            } catch (e) {
-                console.error("Erro na autenticação inicial (signIn):", e);
-                showMessage(`Erro na autenticação inicial: ${e.message}`, 'error');
-            }
-        }
-    });
 };
