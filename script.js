@@ -1,4 +1,4 @@
-// Firebase SDK imports
+=// Firebase SDK imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, deleteDoc, collection, query, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -186,8 +186,12 @@ async function logTransactionToFirestore(transactionData) {
 // --- Event Handlers ---
 
 unlockButton.addEventListener('click', () => {
-    // Trim the input value to remove leading/trailing spaces
-    if (unlockCodeInput.value.trim() === REQUIRED_UNLOCK_CODE) {
+    const enteredCode = unlockCodeInput.value.trim();
+    console.log("Botão 'Desbloquear' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_UNLOCK_CODE) {
         addClientSection.classList.remove('hidden');
         unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!");
