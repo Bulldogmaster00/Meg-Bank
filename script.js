@@ -186,7 +186,8 @@ async function logTransactionToFirestore(transactionData) {
 // --- Event Handlers ---
 
 unlockButton.addEventListener('click', () => {
-    if (unlockCodeInput.value === REQUIRED_UNLOCK_CODE) {
+    // Trim the input value to remove leading/trailing spaces
+    if (unlockCodeInput.value.trim() === REQUIRED_UNLOCK_CODE) {
         addClientSection.classList.remove('hidden');
         unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!");
