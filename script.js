@@ -122,7 +122,7 @@ function renderClientsList(clients) {
             <td class="py-3 px-4 text-sm text-gray-800">${client.nome}</td>
             <td class="py-3 px-4 text-sm text-gray-800 font-semibold">R$${client.saldo.toFixed(2)}</td>
             <td class="py-3 px-4 text-sm">
-                <button data-client-code="${code}" class="remove-client-btn bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-300 ease-in-out shadow-sm text-xs">
+                <button data-client-code="${code}" class="remove-client-btn bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-300 ease-in-out shadow-sm text-xs ${isRemoveClientUnlocked ? '' : 'opacity-50 cursor-not-allowed'}">
                     Remover
                 </button>
             </td>
@@ -137,9 +137,9 @@ function renderClientsList(clients) {
 
         // Add option to select dropdown for deposit
         const optionDeposit = document.createElement('option');
-optionDeposit.value = code;
-optionDeposit.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
-selectedClientDepositSelect.appendChild(optionDeposit);
+        optionDeposit.value = code;
+        optionDeposit.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
+        selectedClientDepositSelect.appendChild(optionDeposit);
     }
 
     // Add event listeners to remove buttons
