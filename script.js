@@ -207,11 +207,69 @@ function saveUnlockStatesToLocalStorage() {
 
 // Removed logTransactionToFirestore as it's a backend/database feature
 
-// --- Event Handlers ---
+// --- Event Handlers (Defined as functions to be attached in window.onload) ---
 
-// Moved event listener attachments inside window.onload
+const handleUnlockClick = () => {
+    const enteredCode = unlockCodeInput.value.trim();
+    console.log("Botão 'Desbloquear Adição de Cliente' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_UNLOCK_CODE);
 
-addClientButton.addEventListener('click', async () => {
+    if (enteredCode === REQUIRED_UNLOCK_CODE) {
+        isAddClientUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
+        addClientSection.classList.remove('hidden');
+        unlockSection.classList.add('hidden');
+        showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
+        unlockCodeInput.value = '';
+        console.log("isAddClientUnlocked após desbloqueio:", isAddClientUnlocked);
+    } else {
+        showMessage("Erro: Código de desbloqueio incorreto.", 'error');
+        console.log("Tentativa de desbloqueio falhou. isAddClientUnlocked:", isAddClientUnlocked);
+    }
+};
+
+const handleUnlockDepositClick = () => {
+    const enteredCode = unlockDepositCodeInput.value.trim();
+    console.log("Botão 'Desbloquear Adicionar Dinheiro' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_DEPOSIT_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
+        isAddMoneyUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
+        addMoneySection.classList.remove('hidden');
+        unlockDepositSection.classList.add('hidden');
+        showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
+        unlockDepositCodeInput.value = '';
+        console.log("isAddMoneyUnlocked após desbloqueio:", isAddMoneyUnlocked);
+    } else {
+        showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
+        console.log("Tentativa de desbloqueio de depósito falhou. isAddMoneyUnlocked:", isAddMoneyUnlocked);
+    }
+};
+
+const handleUnlockRemoveClientClick = () => {
+    const enteredCode = unlockRemoveClientCodeInput.value.trim();
+    console.log("Botão 'Desbloquear Remover Cliente' clicado.");
+    console.log("Código digitado (trim):", enteredCode);
+    console.log("Código esperado:", REQUIRED_REMOVE_UNLOCK_CODE);
+
+    if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
+        isRemoveClientUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
+        unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
+        showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
+        unlockRemoveClientCodeInput.value = '';
+        console.log("isRemoveClientUnlocked após desbloqueio:", isRemoveClientUnlocked);
+    } else {
+        showMessage("Erro: Código de desbloqueio incorreto para remover cliente.", 'error');
+        console.log("Tentativa de desbloqueio de remoção falhou. isRemoveClientUnlocked:", isRemoveClientUnlocked);
+    }
+};
+
+
+const handleAddClientClick = async () => {
     console.log("Botão 'Adicionar Cliente' clicado.");
     console.log("Estado atual de isAddClientUnlocked:", isAddClientUnlocked); // Log do estado antes da verificação
 
@@ -255,9 +313,9 @@ addClientButton.addEventListener('click', async () => {
         showMessage("Erro ao adicionar cliente. Tente novamente.", 'error');
         delete clientsData[newClientCode]; // Revert local state if save fails
     }
-});
+};
 
-discountButton.addEventListener('click', async () => {
+const handleDiscountClick = async () => {
     const selectedCode = selectedClientCodeSelect.value;
     const discountValue = parseFloat(discountValueInput.value);
 
@@ -296,10 +354,9 @@ discountButton.addEventListener('click', async () => {
         showMessage("Erro ao descontar saldo. Tente novamente.", 'error');
         clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
     }
-});
+};
 
-// New Event listener for Deposit button
-depositButton.addEventListener('click', async () => {
+const handleDepositClick = async () => {
     if (!isAddMoneyUnlocked) {
         showMessage("Por favor, desbloqueie a função de adicionar dinheiro primeiro.", 'error');
         return;
@@ -338,10 +395,10 @@ depositButton.addEventListener('click', async () => {
         showMessage("Erro ao adicionar dinheiro. Tente novamente.", 'error');
         clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
     }
-});
+};
 
 
-confirmDeleteButton.addEventListener('click', async () => {
+const handleConfirmDeleteClick = async () => {
     // The check for isRemoveClientUnlocked is now done in renderClientsList when the button is clicked
     // This ensures the modal only appears if unlocked.
     if (clientToDeleteCode) {
@@ -360,21 +417,18 @@ confirmDeleteButton.addEventListener('click', async () => {
         clientToDeleteCode = null;
         confirmModal.classList.add('hidden');
     }
-});
+};
 
-cancelDeleteButton.addEventListener('click', () => {
+const handleCancelDeleteClick = () => {
     clientToDeleteCode = null;
     confirmModal.classList.add('hidden');
     showMessage("Remoção de cliente cancelada.");
-});
+};
 
 // --- Initial Setup ---
 
 window.onload = () => {
     // Assign DOM Elements here to ensure they are loaded
-    // Remove userIdDisplay as there's no Firebase user ID
-    // const userIdDisplay = document.getElementById('userIdDisplay');
-    // const currentUserIdSpan = document.getElementById('currentUserId'); // No longer used directly here
     messageDisplay = document.getElementById('messageDisplay');
     unlockSection = document.getElementById('unlockSection');
     unlockCodeInput = document.getElementById('unlockCodeInput');
@@ -405,221 +459,16 @@ window.onload = () => {
     unlockRemoveClientCodeInput = document.getElementById('unlockRemoveClientCodeInput');
     unlockRemoveClientButton = document.getElementById('unlockRemoveClientButton');
 
-    // Attach Event Listeners here
-    unlockButton.addEventListener('click', () => {
-        const enteredCode = unlockCodeInput.value.trim();
-        console.log("Botão 'Desbloquear Adição de Cliente' clicado.");
-        console.log("Código digitado (trim):", enteredCode);
-        console.log("Código esperado:", REQUIRED_UNLOCK_CODE);
+    // Attach Event Listeners here, AFTER elements are assigned
+    unlockButton.addEventListener('click', handleUnlockClick);
+    unlockDepositButton.addEventListener('click', handleUnlockDepositClick);
+    unlockRemoveClientButton.addEventListener('click', handleUnlockRemoveClientClick);
+    addClientButton.addEventListener('click', handleAddClientClick);
+    discountButton.addEventListener('click', handleDiscountClick);
+    depositButton.addEventListener('click', handleDepositClick);
+    confirmDeleteButton.addEventListener('click', handleConfirmDeleteClick);
+    cancelDeleteButton.addEventListener('click', handleCancelDeleteClick);
 
-        if (enteredCode === REQUIRED_UNLOCK_CODE) {
-            isAddClientUnlocked = true;
-            saveUnlockStatesToLocalStorage(); // Save state
-            addClientSection.classList.remove('hidden');
-            unlockSection.classList.add('hidden');
-            showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
-            unlockCodeInput.value = '';
-            console.log("isAddClientUnlocked após desbloqueio:", isAddClientUnlocked);
-        } else {
-            showMessage("Erro: Código de desbloqueio incorreto.", 'error');
-            console.log("Tentativa de desbloqueio falhou. isAddClientUnlocked:", isAddClientUnlocked);
-        }
-    });
-
-    unlockDepositButton.addEventListener('click', () => {
-        const enteredCode = unlockDepositCodeInput.value.trim();
-        console.log("Botão 'Desbloquear Adicionar Dinheiro' clicado.");
-        console.log("Código digitado (trim):", enteredCode);
-        console.log("Código esperado:", REQUIRED_DEPOSIT_UNLOCK_CODE);
-
-        if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
-            isAddMoneyUnlocked = true;
-            saveUnlockStatesToLocalStorage(); // Save state
-            addMoneySection.classList.remove('hidden');
-            unlockDepositSection.classList.add('hidden');
-            showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
-            unlockDepositCodeInput.value = '';
-            console.log("isAddMoneyUnlocked após desbloqueio:", isAddMoneyUnlocked);
-        } else {
-            showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
-            console.log("Tentativa de desbloqueio de depósito falhou. isAddMoneyUnlocked:", isAddMoneyUnlocked);
-        }
-    });
-
-    unlockRemoveClientButton.addEventListener('click', () => {
-        const enteredCode = unlockRemoveClientCodeInput.value.trim();
-        console.log("Botão 'Desbloquear Remover Cliente' clicado.");
-        console.log("Código digitado (trim):", enteredCode);
-        console.log("Código esperado:", REQUIRED_REMOVE_UNLOCK_CODE);
-
-        if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
-            isRemoveClientUnlocked = true;
-            saveUnlockStatesToLocalStorage(); // Save state
-            unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
-            showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
-            unlockRemoveClientCodeInput.value = '';
-            console.log("isRemoveClientUnlocked após desbloqueio:", isRemoveClientUnlocked);
-        } else {
-            showMessage("Erro: Código de desbloqueio incorreto para remover cliente.", 'error');
-            console.log("Tentativa de desbloqueio de remoção falhou. isRemoveClientUnlocked:", isRemoveClientUnlocked);
-        }
-    });
-
-    addClientButton.addEventListener('click', async () => {
-        console.log("Botão 'Adicionar Cliente' clicado.");
-        console.log("Estado atual de isAddClientUnlocked:", isAddClientUnlocked); // Log do estado antes da verificação
-
-        if (!isAddClientUnlocked) {
-            showMessage("Por favor, desbloqueie a função de adicionar cliente primeiro.", 'error');
-            return;
-        }
-
-        const newClientCode = newClientCodeInput.value.trim();
-        const newClientName = newClientNameInput.value.trim();
-        const newClientInitialBalance = parseFloat(newClientInitialBalanceInput.value);
-
-        if (!newClientCode || isNaN(newClientInitialBalance)) {
-            showMessage("Código e Saldo Inicial são obrigatórios.", 'error');
-            return;
-        }
-        if (newClientInitialBalance < 0) {
-            showMessage("Saldo inicial inválido! Deve ser um número positivo ou zero.", 'error');
-            return;
-        }
-        if (clientsData[newClientCode]) {
-            showMessage("Erro: Código de cliente já existe!", 'error');
-            return;
-        }
-
-        const newClient = {
-            saldo: newClientInitialBalance,
-            nome: newClientName || `Cliente ${newClientCode}`,
-        };
-
-        clientsData[newClientCode] = newClient; // Update local state
-        const success = saveClientsToLocalStorage(clientsData); // Save to local storage
-
-        if (success) {
-            showMessage(`✅ Cliente ${newClientCode} (${newClient.nome}) adicionado com sucesso com saldo R$${newClientInitialBalance.toFixed(2)}.`);
-            newClientCodeInput.value = '';
-            newClientNameInput.value = '';
-            newClientInitialBalanceInput.value = '';
-            renderClientsList(clientsData); // Re-render UI
-        } else {
-            showMessage("Erro ao adicionar cliente. Tente novamente.", 'error');
-            delete clientsData[newClientCode]; // Revert local state if save fails
-        }
-    });
-
-    discountButton.addEventListener('click', async () => {
-        const selectedCode = selectedClientCodeSelect.value;
-        const discountValue = parseFloat(discountValueInput.value);
-
-        if (!selectedCode) {
-            showMessage("Por favor, selecione um cliente.", 'error');
-            return;
-        }
-        const client = clientsData[selectedCode];
-        if (!client) {
-            showMessage("Cliente não encontrado.", 'error');
-            return;
-        }
-
-        if (isNaN(discountValue) || discountValue <= 0) {
-            showMessage("Valor inválido! Use números positivos.", 'error');
-            return;
-        }
-        if (discountValue > client.saldo) {
-            showMessage("Saldo insuficiente!", 'error');
-            return;
-        }
-
-        const saldoAnterior = client.saldo;
-        const novoSaldo = saldoAnterior - discountValue;
-        const updatedClientData = { ...client, saldo: novoSaldo };
-
-        clientsData[selectedCode] = updatedClientData; // Update local state
-        const success = saveClientsToLocalStorage(clientsData); // Save to local storage
-
-        if (success) {
-            showMessage(`✅ R$${discountValue.toFixed(2)} descontado de ${client.nome}. Novo saldo: R$${novoSaldo.toFixed(2)}`);
-            // Removed logTransactionToFirestore
-            discountValueInput.value = '';
-            renderClientsList(clientsData); // Re-render UI
-        } else {
-            showMessage("Erro ao descontar saldo. Tente novamente.", 'error');
-            clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
-        }
-    });
-
-    depositButton.addEventListener('click', async () => {
-        if (!isAddMoneyUnlocked) {
-            showMessage("Por favor, desbloqueie a função de adicionar dinheiro primeiro.", 'error');
-            return;
-        }
-
-        const selectedCode = selectedClientDepositSelect.value;
-        const depositValue = parseFloat(depositValueInput.value);
-
-        if (!selectedCode) {
-            showMessage("Por favor, selecione um cliente para adicionar dinheiro.", 'error');
-            return;
-        }
-        const client = clientsData[selectedCode];
-        if (!client) {
-            showMessage("Cliente não encontrado.", 'error');
-            return;
-        }
-
-        if (isNaN(depositValue) || depositValue <= 0) {
-            showMessage("Valor inválido para depósito! Use números positivos.", 'error');
-            return;
-        }
-
-        const saldoAnterior = client.saldo;
-        const novoSaldo = saldoAnterior + depositValue;
-        const updatedClientData = { ...client, saldo: novoSaldo };
-
-        clientsData[selectedCode] = updatedClientData; // Update local state
-        const success = saveClientsToLocalStorage(clientsData); // Save to local storage
-
-        if (success) {
-            showMessage(`✅ R$${depositValue.toFixed(2)} adicionado a ${client.nome}. Novo saldo: R$${novoSaldo.toFixed(2)}`);
-            depositValueInput.value = '';
-            renderClientsList(clientsData); // Re-render UI
-        } else {
-            showMessage("Erro ao adicionar dinheiro. Tente novamente.", 'error');
-            clientsData[selectedCode].saldo = saldoAnterior; // Revert local state if save fails
-        }
-    });
-
-
-    confirmDeleteButton.addEventListener('click', async () => {
-        // The check for isRemoveClientUnlocked is now done in renderClientsList when the button is clicked
-        // This ensures the modal only appears if unlocked.
-        if (clientToDeleteCode) {
-            // Delete from local state
-            const clientName = clientsData[clientToDeleteCode]?.nome || clientToDeleteCode;
-            delete clientsData[clientToDeleteCode];
-            const success = saveClientsToLocalStorage(clientsData); // Save to local storage
-
-            if (success) {
-                showMessage(`✅ Cliente ${clientName} removido com sucesso!`);
-                renderClientsList(clientsData); // Re-render UI
-            } else {
-                showMessage(`Erro ao remover cliente ${clientName}.`, 'error');
-                // Revert if save fails (complex for delete, usually just let it fail)
-            }
-            clientToDeleteCode = null;
-            confirmModal.classList.add('hidden');
-        }
-    });
-
-    cancelDeleteButton.addEventListener('click', () => {
-        clientToDeleteCode = null;
-        confirmModal.classList.add('hidden');
-        showMessage("Remoção de cliente cancelada.");
-    });
 
     // Load clients from local storage on page load
     clientsData = loadClientsFromLocalStorage();
