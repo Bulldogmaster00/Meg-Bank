@@ -49,7 +49,7 @@ let unlockRemoveClientButton;
 
 // Secret Unlock Codes
 const REQUIRED_UNLOCK_CODE = '956523332996147453'; // Code for Add Client
-const REQUIRED_DEPOSIT_UNLOCK_CODE = '1234567890'; // Code for Add Money
+const REQUIRED_DEPOSIT_UNLOCK_CODE = '956523332996147453'; // Code for Add Money
 const REQUIRED_REMOVE_UNLOCK_CODE = '956523332996147453'; // New code for Remove Client
 
 // State variables (managed by JavaScript directly)
