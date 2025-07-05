@@ -117,12 +117,14 @@ function renderClientsList(clients) {
         const client = clients[code];
         const row = document.createElement('tr');
         row.className = 'border-b border-gray-200 last:border-b-0 hover:bg-gray-50';
+        // Add a class to disable the button visually if not unlocked
+        const removeButtonClass = `remove-client-btn bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-300 ease-in-out shadow-sm text-xs ${isRemoveClientUnlocked ? '' : 'opacity-50 cursor-not-allowed'}`;
         row.innerHTML = `
             <td class="py-3 px-4 text-sm text-gray-800 font-mono">${code}</td>
             <td class="py-3 px-4 text-sm text-gray-800">${client.nome}</td>
             <td class="py-3 px-4 text-sm text-gray-800 font-semibold">R$${client.saldo.toFixed(2)}</td>
             <td class="py-3 px-4 text-sm">
-                <button data-client-code="${code}" class="remove-client-btn bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-300 ease-in-out shadow-sm text-xs ${isRemoveClientUnlocked ? '' : 'opacity-50 cursor-not-allowed'}">
+                <button data-client-code="${code}" class="${removeButtonClass}">
                     Remover
                 </button>
             </td>
@@ -232,10 +234,10 @@ const handleUnlockClick = () => {
     if (enteredCode === REQUIRED_UNLOCK_CODE) {
         isAddClientUnlocked = true;
         saveUnlockStatesToLocalStorage(); // Save state
-        addClientSection.classList.remove('hidden');
-        unlockSection.classList.add('hidden');
+        if (addClientSection) addClientSection.classList.remove('hidden');
+        if (unlockSection) unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
-        unlockCodeInput.value = '';
+        if (unlockCodeInput) unlockCodeInput.value = '';
         console.log("isAddClientUnlocked após desbloqueio:", isAddClientUnlocked);
     } else {
         showMessage("Erro: Código de desbloqueio incorreto.", 'error');
@@ -252,10 +254,10 @@ const handleUnlockDepositClick = () => {
     if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
         isAddMoneyUnlocked = true;
         saveUnlockStatesToLocalStorage(); // Save state
-        addMoneySection.classList.remove('hidden');
-        unlockDepositSection.classList.add('hidden');
+        if (addMoneySection) addMoneySection.classList.remove('hidden');
+        if (unlockDepositSection) unlockDepositSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
-        unlockDepositCodeInput.value = '';
+        if (unlockDepositCodeInput) unlockDepositCodeInput.value = '';
         console.log("isAddMoneyUnlocked após desbloqueio:", isAddMoneyUnlocked);
     } else {
         showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
@@ -272,10 +274,11 @@ const handleUnlockRemoveClientClick = () => {
     if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
         isRemoveClientUnlocked = true;
         saveUnlockStatesToLocalStorage(); // Save state
-        unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
+        if (unlockRemoveClientSection) unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
         showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
-        unlockRemoveClientCodeInput.value = '';
+        if (unlockRemoveClientCodeInput) unlockRemoveClientCodeInput.value = '';
         console.log("isRemoveClientUnlocked após desbloqueio:", isRemoveClientUnlocked);
+        renderClientsList(clientsData); // Re-render to update button state
     } else {
         showMessage("Erro: Código de desbloqueio incorreto para remover cliente.", 'error');
         console.log("Tentativa de desbloqueio de remoção falhou. isRemoveClientUnlocked:", isRemoveClientUnlocked);
@@ -429,13 +432,13 @@ const handleConfirmDeleteClick = async () => {
             // Revert if save fails (complex for delete, usually just let it fail)
         }
         clientToDeleteCode = null;
-        confirmModal.classList.add('hidden');
+        if (confirmModal) confirmModal.classList.add('hidden');
     }
 };
 
 const handleCancelDeleteClick = () => {
     clientToDeleteCode = null;
-    confirmModal.classList.add('hidden');
+    if (confirmModal) confirmModal.classList.add('hidden');
     showMessage("Remoção de cliente cancelada.");
 };
 
@@ -526,25 +529,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize visibility of sections based on loaded states
     if (!isAddClientUnlocked) {
-        addClientSection.classList.add('hidden');
-        unlockSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
+        if (addClientSection) addClientSection.classList.add('hidden');
+        if (unlockSection) unlockSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
     } else {
-        addClientSection.classList.remove('hidden');
-        unlockSection.classList.add('hidden');
+        if (addClientSection) addClientSection.classList.remove('hidden');
+        if (unlockSection) unlockSection.classList.add('hidden');
     }
 
     if (!isAddMoneyUnlocked) {
-        addMoneySection.classList.add('hidden');
-        unlockDepositSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
+        if (addMoneySection) addMoneySection.classList.add('hidden');
+        if (unlockDepositSection) unlockDepositSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
     } else {
-        addMoneySection.classList.remove('hidden');
-        unlockDepositSection.classList.add('hidden');
+        if (addMoneySection) addMoneySection.classList.remove('hidden');
+        if (unlockDepositSection) unlockDepositSection.classList.add('hidden');
     }
 
     if (!isRemoveClientUnlocked) {
-        unlockRemoveClientSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
+        if (unlockRemoveClientSection) unlockRemoveClientSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
     } else {
-        unlockRemoveClientSection.classList.add('hidden');
+        if (unlockRemoveClientSection) unlockRemoveClientSection.classList.add('hidden');
     }
 
     console.log("Estado inicial de isAddClientUnlocked (após DOMContentLoaded):", isAddClientUnlocked);
