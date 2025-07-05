@@ -15,7 +15,7 @@ let isAuthReady = true; // Always ready for local storage
 
 console.log("Script.js carregado e a iniciar (sem Firebase)...");
 
-// Declare DOM Elements variables at a higher scope, but assign them inside window.onload
+// Declare DOM Elements variables at a higher scope, but assign them inside DOMContentLoaded
 let messageDisplay;
 let unlockSection;
 let unlockCodeInput;
@@ -62,20 +62,29 @@ let isRemoveClientUnlocked = false; // New state for remove client unlock
 // --- Utility Functions ---
 
 function showMessage(msg, type = 'info') {
-    messageDisplay.textContent = msg;
-    messageDisplay.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
-    if (type === 'error') {
-        messageDisplay.classList.add('bg-red-100', 'text-red-700');
+    if (messageDisplay) { // Check if messageDisplay is assigned
+        messageDisplay.textContent = msg;
+        messageDisplay.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+        if (type === 'error') {
+            messageDisplay.classList.add('bg-red-100', 'text-red-700');
+        } else {
+            messageDisplay.classList.add('bg-green-100', 'text-green-700');
+        }
+        // Hide message after 5 seconds
+        setTimeout(() => {
+            messageDisplay.classList.add('hidden');
+        }, 5000);
     } else {
-        messageDisplay.classList.add('bg-green-100', 'text-green-700');
+        console.warn("messageDisplay element not found, cannot show message:", msg);
     }
-    // Hide message after 5 seconds
-    setTimeout(() => {
-        messageDisplay.classList.add('hidden');
-    }, 5000);
 }
 
 function renderClientsList(clients) {
+    if (!clientsListContainer || !selectedClientCodeSelect || !selectedClientDepositSelect) {
+        console.error("renderClientsList: Um ou mais elementos DOM essenciais não foram encontrados.");
+        return;
+    }
+
     clientsListContainer.innerHTML = ''; // Clear previous list
 
     if (Object.keys(clients).length === 0) {
@@ -142,8 +151,12 @@ function renderClientsList(clients) {
             }
             const code = event.target.dataset.clientCode;
             clientToDeleteCode = code;
-            clientToDeleteNameSpan.textContent = clientsData[code]?.nome || code;
-            confirmModal.classList.remove('hidden');
+            if (clientToDeleteNameSpan) { // Check if element exists before using
+                clientToDeleteNameSpan.textContent = clientsData[code]?.nome || code;
+            }
+            if (confirmModal) { // Check if element exists before using
+                confirmModal.classList.remove('hidden');
+            }
         });
     });
 }
@@ -207,7 +220,7 @@ function saveUnlockStatesToLocalStorage() {
 
 // Removed logTransactionToFirestore as it's a backend/database feature
 
-// --- Event Handlers (Defined as functions to be attached in window.onload) ---
+// --- Event Handlers (Defined as functions to be attached in DOMContentLoaded) ---
 
 const handleUnlockClick = () => {
     const enteredCode = unlockCodeInput.value.trim();
@@ -427,7 +440,7 @@ const handleCancelDeleteClick = () => {
 
 // --- Initial Setup ---
 
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Assign DOM Elements here to ensure they are loaded
     messageDisplay = document.getElementById('messageDisplay');
     unlockSection = document.getElementById('unlockSection');
@@ -459,15 +472,27 @@ window.onload = () => {
     unlockRemoveClientCodeInput = document.getElementById('unlockRemoveClientCodeInput');
     unlockRemoveClientButton = document.getElementById('unlockRemoveClientButton');
 
+    // Log to check if elements are found
+    console.log("Elementos DOM atribuídos:");
+    console.log("unlockButton:", unlockButton);
+    console.log("addClientButton:", addClientButton);
+    console.log("discountButton:", discountButton);
+    console.log("depositButton:", depositButton);
+    console.log("confirmDeleteButton:", confirmDeleteButton);
+    console.log("cancelDeleteButton:", cancelDeleteButton);
+    console.log("unlockDepositButton:", unlockDepositButton);
+    console.log("unlockRemoveClientButton:", unlockRemoveClientButton);
+
+
     // Attach Event Listeners here, AFTER elements are assigned
-    unlockButton.addEventListener('click', handleUnlockClick);
-    unlockDepositButton.addEventListener('click', handleUnlockDepositClick);
-    unlockRemoveClientButton.addEventListener('click', handleUnlockRemoveClientClick);
-    addClientButton.addEventListener('click', handleAddClientClick);
-    discountButton.addEventListener('click', handleDiscountClick);
-    depositButton.addEventListener('click', handleDepositClick);
-    confirmDeleteButton.addEventListener('click', handleConfirmDeleteClick);
-    cancelDeleteButton.addEventListener('click', handleCancelDeleteClick);
+    if (unlockButton) unlockButton.addEventListener('click', handleUnlockClick);
+    if (unlockDepositButton) unlockDepositButton.addEventListener('click', handleUnlockDepositClick);
+    if (unlockRemoveClientButton) unlockRemoveClientButton.addEventListener('click', handleUnlockRemoveClientClick);
+    if (addClientButton) addClientButton.addEventListener('click', handleAddClientClick);
+    if (discountButton) discountButton.addEventListener('click', handleDiscountClick);
+    if (depositButton) depositButton.addEventListener('click', handleDepositClick);
+    if (confirmDeleteButton) confirmDeleteButton.addEventListener('click', handleConfirmDeleteClick);
+    if (cancelDeleteButton) cancelDeleteButton.addEventListener('click', handleCancelDeleteClick);
 
 
     // Load clients from local storage on page load
@@ -505,7 +530,7 @@ window.onload = () => {
         unlockRemoveClientSection.classList.add('hidden');
     }
 
-    console.log("Estado inicial de isAddClientUnlocked (após onload):", isAddClientUnlocked);
-    console.log("Estado inicial de isAddMoneyUnlocked (após onload):", isAddMoneyUnlocked);
-    console.log("Estado inicial de isRemoveClientUnlocked (após onload):", isRemoveClientUnlocked);
-};
+    console.log("Estado inicial de isAddClientUnlocked (após DOMContentLoaded):", isAddClientUnlocked);
+    console.log("Estado inicial de isAddMoneyUnlocked (após DOMContentLoaded):", isAddMoneyUnlocked);
+    console.log("Estado inicial de isRemoveClientUnlocked (após DOMContentLoaded):", isRemoveClientUnlocked);
+});
