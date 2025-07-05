@@ -177,6 +177,35 @@ function saveClientsToLocalStorage(clients) {
     }
 }
 
+// New functions to manage unlock states in localStorage
+function loadUnlockStatesFromLocalStorage() {
+    try {
+        const storedStates = localStorage.getItem('megBankUnlockStates');
+        if (storedStates) {
+            const parsedStates = JSON.parse(storedStates);
+            isAddClientUnlocked = parsedStates.isAddClientUnlocked || false;
+            isAddMoneyUnlocked = parsedStates.isAddMoneyUnlocked || false;
+            isRemoveClientUnlocked = parsedStates.isRemoveClientUnlocked || false;
+        }
+    } catch (e) {
+        console.error("Erro ao carregar estados de desbloqueio do localStorage:", e);
+    }
+}
+
+function saveUnlockStatesToLocalStorage() {
+    try {
+        const statesToSave = {
+            isAddClientUnlocked,
+            isAddMoneyUnlocked,
+            isRemoveClientUnlocked
+        };
+        localStorage.setItem('megBankUnlockStates', JSON.stringify(statesToSave));
+    } catch (e) {
+        console.error("Erro ao guardar estados de desbloqueio no localStorage:", e);
+    }
+}
+
+
 // Removed logTransactionToFirestore as it's a backend/database feature
 
 // --- Event Handlers ---
@@ -190,6 +219,7 @@ unlockButton.addEventListener('click', () => {
 
     if (enteredCode === REQUIRED_UNLOCK_CODE) {
         isAddClientUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
         addClientSection.classList.remove('hidden');
         unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
@@ -208,6 +238,7 @@ unlockDepositButton.addEventListener('click', () => {
 
     if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
         isAddMoneyUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
         addMoneySection.classList.remove('hidden');
         unlockDepositSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
@@ -226,6 +257,7 @@ unlockRemoveClientButton.addEventListener('click', () => {
 
     if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
         isRemoveClientUnlocked = true;
+        saveUnlockStatesToLocalStorage(); // Save state
         unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
         showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
         unlockRemoveClientCodeInput.value = '';
@@ -394,6 +426,8 @@ cancelDeleteButton.addEventListener('click', () => {
 window.onload = () => {
     // Load clients from local storage on page load
     clientsData = loadClientsFromLocalStorage();
+    loadUnlockStatesFromLocalStorage(); // Load unlock states
+
     renderClientsList(clientsData); // Render initial list
 
     // Hide userIdDisplay as it's not relevant without Firebase Auth
@@ -402,18 +436,26 @@ window.onload = () => {
         userIdDisplayElement.classList.add('hidden');
     }
 
-    // Initialize visibility of sections
+    // Initialize visibility of sections based on loaded states
     if (!isAddClientUnlocked) {
         addClientSection.classList.add('hidden');
+        unlockSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
+    } else {
+        addClientSection.classList.remove('hidden');
+        unlockSection.classList.add('hidden');
     }
+
     if (!isAddMoneyUnlocked) {
         addMoneySection.classList.add('hidden');
-    }
-    if (!isRemoveClientUnlocked) { // Hide remove client unlock section initially
-        // Note: The remove client buttons are always visible, but the action is blocked by the password.
-        // This section is for the unlock input.
-        unlockRemoveClientSection.classList.remove('hidden'); // Ensure it's visible for unlocking
+        unlockDepositSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
     } else {
-        unlockRemoveClientSection.classList.add('hidden'); // Hide if already unlocked (e.g., from previous session)
+        addMoneySection.classList.remove('hidden');
+        unlockDepositSection.classList.add('hidden');
+    }
+
+    if (!isRemoveClientUnlocked) {
+        unlockRemoveClientSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
+    } else {
+        unlockRemoveClientSection.classList.add('hidden');
     }
 };
