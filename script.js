@@ -47,17 +47,17 @@ let unlockRemoveClientCodeInput;
 let unlockRemoveClientButton;
 
 
-// Secret Unlock Codes
+// Secret Unlock Codes (TODOS UNIFICADOS PARA O MESMO CÓDIGO)
 const REQUIRED_UNLOCK_CODE = '956523332996147453'; // Code for Add Client
-const REQUIRED_DEPOSIT_UNLOCK_CODE = '956523332996147453'; // Code for Add Money
-const REQUIRED_REMOVE_UNLOCK_CODE = '956523332996147453'; // New code for Remove Client
+const REQUIRED_DEPOSIT_UNLOCK_CODE = '956523332996147453'; // Code for Add Money (MODIFICADO)
+const REQUIRED_REMOVE_UNLOCK_CODE = '956523332996147453'; // New code for Remove Client (MODIFICADO)
 
 // State variables (managed by JavaScript directly)
 let clientsData = {};
 let clientToDeleteCode = null; // Stores the code of the client to be deleted
-let isAddClientUnlocked = false; // State for add client unlock
-let isAddMoneyUnlocked = false; // New state for add money unlock
-let isRemoveClientUnlocked = false; // New state for remove client unlock
+let isAddClientUnlocked = false; // State for add client unlock (SEMPRE COMEÇA COMO FALSE)
+let isAddMoneyUnlocked = false; // New state for add money unlock (SEMPRE COMEÇA COMO FALSE)
+let isRemoveClientUnlocked = false; // New state for remove client unlock (SEMPRE COMEÇA COMO FALSE)
 
 // --- Utility Functions ---
 
@@ -188,37 +188,18 @@ function saveClientsToLocalStorage(clients) {
     }
 }
 
-// New functions to manage unlock states in localStorage
+// REMOVIDA OU MODIFICADA: Não precisamos carregar os estados de desbloqueio para que eles resetem
+// Esta função pode ser removida ou deixada vazia, pois os estados serão setados como false no DOMContentLoaded
 function loadUnlockStatesFromLocalStorage() {
-    try {
-        const storedStates = localStorage.getItem('megBankUnlockStates');
-        if (storedStates) {
-            const parsedStates = JSON.parse(storedStates);
-            isAddClientUnlocked = parsedStates.isAddClientUnlocked || false;
-            isAddMoneyUnlocked = parsedStates.isAddMoneyUnlocked || false;
-            isRemoveClientUnlocked = parsedStates.isRemoveClientUnlocked || false;
-            console.log("Estados de desbloqueio carregados do localStorage:", parsedStates);
-        } else {
-            console.log("Nenhum estado de desbloqueio encontrado no localStorage. Usando valores padrão.");
-        }
-    } catch (e) {
-        console.error("Erro ao carregar estados de desbloqueio do localStorage:", e);
-    }
+    console.log("Estados de desbloqueio serão resetados ao reiniciar a aba.");
 }
 
+// REMOVIDA: Não precisamos salvar os estados de desbloqueio para que eles resetem
+/*
 function saveUnlockStatesToLocalStorage() {
-    try {
-        const statesToSave = {
-            isAddClientUnlocked,
-            isAddMoneyUnlocked,
-            isRemoveClientUnlocked
-        };
-        localStorage.setItem('megBankUnlockStates', JSON.stringify(statesToSave));
-        console.log("Estados de desbloqueio guardados no localStorage:", statesToSave);
-    } catch (e) {
-        console.error("Erro ao guardar estados de desbloqueio no localStorage:", e);
-    }
+    // Esta função foi removida para garantir que os estados de desbloqueio não sejam persistidos.
 }
+*/
 
 
 // Removed logTransactionToFirestore as it's a backend/database feature
@@ -233,7 +214,7 @@ const handleUnlockClick = () => {
 
     if (enteredCode === REQUIRED_UNLOCK_CODE) {
         isAddClientUnlocked = true;
-        saveUnlockStatesToLocalStorage(); // Save state
+        // saveUnlockStatesToLocalStorage(); // REMOVIDO: Não persistimos mais o estado de desbloqueio
         if (addClientSection) addClientSection.classList.remove('hidden');
         if (unlockSection) unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
@@ -253,7 +234,7 @@ const handleUnlockDepositClick = () => {
 
     if (enteredCode === REQUIRED_DEPOSIT_UNLOCK_CODE) {
         isAddMoneyUnlocked = true;
-        saveUnlockStatesToLocalStorage(); // Save state
+        // saveUnlockStatesToLocalStorage(); // REMOVIDO: Não persistimos mais o estado de desbloqueio
         if (addMoneySection) addMoneySection.classList.remove('hidden');
         if (unlockDepositSection) unlockDepositSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
@@ -273,7 +254,7 @@ const handleUnlockRemoveClientClick = () => {
 
     if (enteredCode === REQUIRED_REMOVE_UNLOCK_CODE) {
         isRemoveClientUnlocked = true;
-        saveUnlockStatesToLocalStorage(); // Save state
+        // saveUnlockStatesToLocalStorage(); // REMOVIDO: Não persistimos mais o estado de desbloqueio
         if (unlockRemoveClientSection) unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
         showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
         if (unlockRemoveClientCodeInput) unlockRemoveClientCodeInput.value = '';
@@ -517,7 +498,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load clients from local storage on page load
     clientsData = loadClientsFromLocalStorage();
-    loadUnlockStatesFromLocalStorage(); // Load unlock states
+
+    // PERMISSÕES SÃO RESETADAS AQUI (não carregamos do localStorage para elas)
+    isAddClientUnlocked = false;
+    isAddMoneyUnlocked = false;
+    isRemoveClientUnlocked = false;
+    console.log("Estados de desbloqueio resetados ao iniciar.");
 
     renderClientsList(clientsData); // Render initial list
 
@@ -527,28 +513,14 @@ document.addEventListener('DOMContentLoaded', () => {
         userIdDisplayElement.classList.add('hidden');
     }
 
-    // Initialize visibility of sections based on loaded states
-    if (!isAddClientUnlocked) {
-        if (addClientSection) addClientSection.classList.add('hidden');
-        if (unlockSection) unlockSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
-    } else {
-        if (addClientSection) addClientSection.classList.remove('hidden');
-        if (unlockSection) unlockSection.classList.add('hidden');
-    }
+    // Initialize visibility of sections based on loaded states (agora sempre começarão ocultas)
+    if (addClientSection) addClientSection.classList.add('hidden');
+    if (unlockSection) unlockSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
 
-    if (!isAddMoneyUnlocked) {
-        if (addMoneySection) addMoneySection.classList.add('hidden');
-        if (unlockDepositSection) unlockDepositSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
-    } else {
-        if (addMoneySection) addMoneySection.classList.remove('hidden');
-        if (unlockDepositSection) unlockDepositSection.classList.add('hidden');
-    }
+    if (addMoneySection) addMoneySection.classList.add('hidden');
+    if (unlockDepositSection) unlockDepositSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
 
-    if (!isRemoveClientUnlocked) {
-        if (unlockRemoveClientSection) unlockRemoveClientSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
-    } else {
-        if (unlockRemoveClientSection) unlockRemoveClientSection.classList.add('hidden');
-    }
+    if (unlockRemoveClientSection) unlockRemoveClientSection.classList.remove('hidden'); // Ensure unlock section is visible if not unlocked
 
     console.log("Estado inicial de isAddClientUnlocked (após DOMContentLoaded):", isAddClientUnlocked);
     console.log("Estado inicial de isAddMoneyUnlocked (após DOMContentLoaded):", isAddMoneyUnlocked);
