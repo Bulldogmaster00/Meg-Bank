@@ -186,6 +186,9 @@ function loadUnlockStatesFromLocalStorage() {
             isAddClientUnlocked = parsedStates.isAddClientUnlocked || false;
             isAddMoneyUnlocked = parsedStates.isAddMoneyUnlocked || false;
             isRemoveClientUnlocked = parsedStates.isRemoveClientUnlocked || false;
+            console.log("Estados de desbloqueio carregados do localStorage:", parsedStates);
+        } else {
+            console.log("Nenhum estado de desbloqueio encontrado no localStorage. Usando valores padrão.");
         }
     } catch (e) {
         console.error("Erro ao carregar estados de desbloqueio do localStorage:", e);
@@ -200,6 +203,7 @@ function saveUnlockStatesToLocalStorage() {
             isRemoveClientUnlocked
         };
         localStorage.setItem('megBankUnlockStates', JSON.stringify(statesToSave));
+        console.log("Estados de desbloqueio guardados no localStorage:", statesToSave);
     } catch (e) {
         console.error("Erro ao guardar estados de desbloqueio no localStorage:", e);
     }
@@ -224,8 +228,10 @@ unlockButton.addEventListener('click', () => {
         unlockSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Novo Cliente' desbloqueada!", 'info');
         unlockCodeInput.value = '';
+        console.log("isAddClientUnlocked após desbloqueio:", isAddClientUnlocked);
     } else {
         showMessage("Erro: Código de desbloqueio incorreto.", 'error');
+        console.log("Tentativa de desbloqueio falhou. isAddClientUnlocked:", isAddClientUnlocked);
     }
 });
 
@@ -243,8 +249,10 @@ unlockDepositButton.addEventListener('click', () => {
         unlockDepositSection.classList.add('hidden');
         showMessage("✅ Função 'Adicionar Dinheiro' desbloqueada!", 'info');
         unlockDepositCodeInput.value = '';
+        console.log("isAddMoneyUnlocked após desbloqueio:", isAddMoneyUnlocked);
     } else {
         showMessage("Erro: Código de desbloqueio incorreto para adicionar dinheiro.", 'error');
+        console.log("Tentativa de desbloqueio de depósito falhou. isAddMoneyUnlocked:", isAddMoneyUnlocked);
     }
 });
 
@@ -261,13 +269,18 @@ unlockRemoveClientButton.addEventListener('click', () => {
         unlockRemoveClientSection.classList.add('hidden'); // Hide the unlock section
         showMessage("✅ Função 'Remover Cliente' desbloqueada!", 'info');
         unlockRemoveClientCodeInput.value = '';
+        console.log("isRemoveClientUnlocked após desbloqueio:", isRemoveClientUnlocked);
     } else {
         showMessage("Erro: Código de desbloqueio incorreto para remover cliente.", 'error');
+        console.log("Tentativa de desbloqueio de remoção falhou. isRemoveClientUnlocked:", isRemoveClientUnlocked);
     }
 });
 
 
 addClientButton.addEventListener('click', async () => {
+    console.log("Botão 'Adicionar Cliente' clicado.");
+    console.log("Estado atual de isAddClientUnlocked:", isAddClientUnlocked); // Log do estado antes da verificação
+
     if (!isAddClientUnlocked) {
         showMessage("Por favor, desbloqueie a função de adicionar cliente primeiro.", 'error');
         return;
@@ -458,4 +471,8 @@ window.onload = () => {
     } else {
         unlockRemoveClientSection.classList.add('hidden');
     }
+
+    console.log("Estado inicial de isAddClientUnlocked (após onload):", isAddClientUnlocked);
+    console.log("Estado inicial de isAddMoneyUnlocked (após onload):", isAddMoneyUnlocked);
+    console.log("Estado inicial de isRemoveClientUnlocked (após onload):", isRemoveClientUnlocked);
 };
