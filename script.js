@@ -75,7 +75,7 @@ function showMessage(msg, type = 'info') {
             messageDisplay.classList.add('hidden');
         }, 5000);
     } else {
-        console.warn("messageDisplay element not found, cannot show message:", msg);
+        console.warn("showMessage: Element 'messageDisplay' not found.");
     }
 }
 
@@ -137,14 +137,15 @@ function renderClientsList(clients) {
 
         // Add option to select dropdown for deposit
         const optionDeposit = document.createElement('option');
-        optionDeposit.value = code;
-        optionDeposit.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
-        selectedClientDepositSelect.appendChild(optionDeposit);
+optionDeposit.value = code;
+optionDeposit.textContent = `${client.nome} (R$${client.saldo.toFixed(2)})`;
+selectedClientDepositSelect.appendChild(optionDeposit);
     }
 
     // Add event listeners to remove buttons
     document.querySelectorAll('.remove-client-btn').forEach(button => {
         button.addEventListener('click', (event) => {
+            console.log("Botão 'Remover' clicado. isRemoveClientUnlocked:", isRemoveClientUnlocked); // Log do estado
             if (!isRemoveClientUnlocked) { // Check if remove client function is unlocked
                 showMessage("Por favor, desbloqueie a função de remover cliente primeiro.", 'error');
                 return;
@@ -443,45 +444,61 @@ const handleCancelDeleteClick = () => {
 document.addEventListener('DOMContentLoaded', () => {
     // Assign DOM Elements here to ensure they are loaded
     messageDisplay = document.getElementById('messageDisplay');
+    console.log("messageDisplay:", messageDisplay); // DEBUG
     unlockSection = document.getElementById('unlockSection');
+    console.log("unlockSection:", unlockSection); // DEBUG
     unlockCodeInput = document.getElementById('unlockCodeInput');
+    console.log("unlockCodeInput:", unlockCodeInput); // DEBUG
     unlockButton = document.getElementById('unlockButton');
+    console.log("unlockButton:", unlockButton); // DEBUG
     addClientSection = document.getElementById('addClientSection');
+    console.log("addClientSection:", addClientSection); // DEBUG
     newClientCodeInput = document.getElementById('newClientCode');
+    console.log("newClientCodeInput:", newClientCodeInput); // DEBUG
     newClientNameInput = document.getElementById('newClientName');
+    console.log("newClientNameInput:", newClientNameInput); // DEBUG
     newClientInitialBalanceInput = document.getElementById('newClientInitialBalance');
+    console.log("newClientInitialBalanceInput:", newClientInitialBalanceInput); // DEBUG
     addClientButton = document.getElementById('addClientButton');
+    console.log("addClientButton:", addClientButton); // DEBUG
     selectedClientCodeSelect = document.getElementById('selectedClientCode');
+    console.log("selectedClientCodeSelect:", selectedClientCodeSelect); // DEBUG
     discountValueInput = document.getElementById('discountValue');
+    console.log("discountValueInput:", discountValueInput); // DEBUG
     discountButton = document.getElementById('discountButton');
+    console.log("discountButton:", discountButton); // DEBUG
     clientsListContainer = document.getElementById('clientsListContainer');
+    console.log("clientsListContainer:", clientsListContainer); // DEBUG
     confirmModal = document.getElementById('confirmModal');
+    console.log("confirmModal:", confirmModal); // DEBUG
     clientToDeleteNameSpan = document.getElementById('clientToDeleteName');
+    console.log("clientToDeleteNameSpan:", clientToDeleteNameSpan); // DEBUG
     confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    console.log("confirmDeleteButton:", confirmDeleteButton); // DEBUG
     cancelDeleteButton = document.getElementById('cancelDeleteButton');
+    console.log("cancelDeleteButton:", cancelDeleteButton); // DEBUG
 
     unlockDepositSection = document.getElementById('unlockDepositSection');
+    console.log("unlockDepositSection:", unlockDepositSection); // DEBUG
     unlockDepositCodeInput = document.getElementById('unlockDepositCodeInput');
+    console.log("unlockDepositCodeInput:", unlockDepositCodeInput); // DEBUG
     unlockDepositButton = document.getElementById('unlockDepositButton');
+    console.log("unlockDepositButton:", unlockDepositButton); // DEBUG
     addMoneySection = document.getElementById('addMoneySection');
+    console.log("addMoneySection:", addMoneySection); // DEBUG
     selectedClientDepositSelect = document.getElementById('selectedClientDepositSelect');
+    console.log("selectedClientDepositSelect:", selectedClientDepositSelect); // DEBUG
     depositValueInput = document.getElementById('depositValueInput');
+    console.log("depositValueInput:", depositValueInput); // DEBUG
     depositButton = document.getElementById('depositButton');
+    console.log("depositButton:", depositButton); // DEBUG
 
     unlockRemoveClientSection = document.getElementById('unlockRemoveClientSection');
+    console.log("unlockRemoveClientSection:", unlockRemoveClientSection); // DEBUG
     unlockRemoveClientCodeInput = document.getElementById('unlockRemoveClientCodeInput');
+    console.log("unlockRemoveClientCodeInput:", unlockRemoveClientCodeInput); // DEBUG
     unlockRemoveClientButton = document.getElementById('unlockRemoveClientButton');
-
-    // Log to check if elements are found
-    console.log("Elementos DOM atribuídos:");
-    console.log("unlockButton:", unlockButton);
-    console.log("addClientButton:", addClientButton);
-    console.log("discountButton:", discountButton);
-    console.log("depositButton:", depositButton);
-    console.log("confirmDeleteButton:", confirmDeleteButton);
-    console.log("cancelDeleteButton:", cancelDeleteButton);
-    console.log("unlockDepositButton:", unlockDepositButton);
-    console.log("unlockRemoveClientButton:", unlockRemoveClientButton);
+    console.log("unlockRemoveClientButton:", unlockRemoveClientButton); // DEBUG
 
 
     // Attach Event Listeners here, AFTER elements are assigned
